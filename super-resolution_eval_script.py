@@ -11,9 +11,9 @@ def rgb2ycbcr(im_rgb):
 
 def compare_psnr_y(x, y):
     return compare_psnr(rgb2ycbcr(x.transpose(1,2,0))[:,:,0], rgb2ycbcr(y.transpose(1,2,0))[:,:,0])
-    
+
 from collections import defaultdict
-datasets = { 
+datasets = {
     'Set14':   ["baboon", "barbara", "bridge", "coastguard", "comic", "face", "flowers", "foreman", "lenna", "man", "monarch", "pepper", "ppt3", "zebra"],
 #     'Set5':    ['baby', 'bird', 'butterfly', 'head', 'woman']
 }
@@ -21,12 +21,12 @@ from glob import glob
 # g = sorted(glob('../image_compare/data/sr/Set5/x4/*'))
 
 from skimage.measure import compare_psnr
-# our 
+# our
 stats = {}
 imsize  = -1
 dct = defaultdict(lambda : 0)
 for cur_dataset in datasets.keys():
-    
+
     for method_name in postfixes:
         psnrs = []
         for name in datasets[cur_dataset]:
@@ -37,32 +37,32 @@ for cur_dataset in datasets.keys():
             gt_pil,     gt      = get_image(img_HR, imsize)
             ours_pil,   ours    = get_image(ours, imsize)
             method_pil, methods = get_image(method, imsize)
-            
+
             if methods.shape[0] == 1:
                 methods = np.concatenate([methods, methods, methods], 0)
-    
+
             q1 = ours[:3].sum(0)
             t1 = np.where(q1.sum(0) > 0)[0]
             t2 = np.where(q1.sum(1) > 0)[0]
 
 
 
-            psnr = compare_psnr_y(gt     [:3,t2[0] + 4:t2[-1]-4,t1[0] + 4:t1[-1] - 4], 
+            psnr = compare_psnr_y(gt     [:3,t2[0] + 4:t2[-1]-4,t1[0] + 4:t1[-1] - 4],
                                   methods[:3,t2[0] + 4:t2[-1]-4,t1[0] + 4:t1[-1] - 4])
 
-    #         psnr = compare_psnr(gt  [:3], 
+    #         psnr = compare_psnr(gt  [:3],
     #                             ours[:3])
 
             psnrs.append(psnr)
 
             print(name, psnr)
 
-        
+
         header = f'\small{{{method_name}}} & ' + ' & '.join([f'${x:.4}$' for x in psnrs])
-        
+
         stats[method_name] = [header, np.mean(psnrs)]
-        
+
         print (header)
-        
+
     names = datasets[cur_dataset]
-    header = ' & ' + ' & '.join([f'\small{{{x.title()}}}' for x in names])    
+    header = ' & ' + ' & '.join([f'\small{{{x.title()}}}' for x in names])
